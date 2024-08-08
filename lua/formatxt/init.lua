@@ -132,7 +132,8 @@ M.gsubCharForBLline = function()
 
 	local listToString = table.concat(lines, "|")
 
-	local addLineBreak = string.gsub(listToString, "[,:;.|()]", "\n")
+  --local addLineBreak = string.gsub(listToString, "[,:;.|()]", "\n")
+  local addLineBreak = string.gsub(listToString, "([,:;.|()])", "%1\n")
 
 	local result = {}
 	local delimiter = "\n"
