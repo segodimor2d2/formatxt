@@ -79,6 +79,38 @@ M.addPrefixLines = function()
 	-- end
 end
 
+M.addPrefixTitLines = function()
+	local getBuffer = vim.api.nvim_get_current_buf()
+
+	local _, srow, scol = unpack(vim.fn.getpos("v"))
+	local _, erow, ecol = unpack(vim.fn.getpos("."))
+	local lini = -1
+	local lfin = -1
+
+	local lines = {}
+
+	if vim.fn.mode() == "V" then
+		if srow > erow then
+			lini, lfin = erow, srow
+		else
+			lini, lfin = srow, erow
+		end
+		lines = vim.api.nvim_buf_get_lines(0, lini - 1, lfin, true)
+	end
+
+	local listout = {}
+	for i = 1, #lines do
+		if lines[i] ~= "" then
+			local resAddPrefix = string.gsub(lines[i], "^([ \t]*)", "%1# ")
+			table.insert(listout, resAddPrefix)
+		end
+	end
+
+	vim.api.nvim_buf_set_lines(getBuffer, lini - 1, lfin, false, listout)
+
+end
+
+
 M.gsubCharForBLline = function()
 	local getBuffer = vim.api.nvim_get_current_buf()
 
@@ -126,6 +158,10 @@ M.setup = function()
 
 	vim.keymap.set("v", "<leader>fp", function()
 		M.addPrefixLines()
+	end, { desc = "AddPrefix" })
+
+	vim.keymap.set("v", "<leader>ft", function()
+		M.addPrefixTitLines()
 	end, { desc = "AddPrefix" })
 
 	vim.keymap.set("v", "<leader>fb", function()
