@@ -110,7 +110,6 @@ M.addPrefixTitLines = function()
 
 end
 
-
 M.gsubCharForBLline = function()
 	local getBuffer = vim.api.nvim_get_current_buf()
 
@@ -152,6 +151,47 @@ M.gsubCharForBLline = function()
 	vim.api.nvim_buf_set_lines(getBuffer, lini - 1, lfin, false, listout)
 end
 
+M.gsubCharForBLlineCommaDot = function()
+	local getBuffer = vim.api.nvim_get_current_buf()
+
+	local _, srow, scol = unpack(vim.fn.getpos("v"))
+	local _, erow, ecol = unpack(vim.fn.getpos("."))
+	local lini = -1
+	local lfin = -1
+
+	local lines = {}
+
+	if vim.fn.mode() == "V" then
+		if srow > erow then
+			lini, lfin = erow, srow
+		else
+			lini, lfin = srow, erow
+		end
+		lines = vim.api.nvim_buf_get_lines(0, lini - 1, lfin, true)
+	end
+
+	local listToString = table.concat(lines, "|")
+
+  --local addLineBreak = string.gsub(listToString, "[,:;.|()]", "\n")
+  local addLineBreak = string.gsub(listToString, ",.", "%1\n")
+
+	local result = {}
+	local delimiter = "\n"
+	for match in (addLineBreak .. delimiter):gmatch("(.-)" .. delimiter) do
+		table.insert(result, match)
+	end
+
+	local listout = {}
+	for i = 1, #result do
+		if result[i] ~= "" then
+			local stringTrimmed = result[i]:gsub("^%s*", "")
+			table.insert(listout, stringTrimmed)
+		end
+	end
+
+	vim.api.nvim_buf_set_lines(getBuffer, lini - 1, lfin, false, listout)
+end
+
 M.setup = function()
 	vim.keymap.set("v", "<leader>fd", function()
 		M.emptylines()
@@ -168,6 +208,11 @@ M.setup = function()
 	vim.keymap.set("v", "<leader>fb", function()
 		M.gsubCharForBLline()
 	end, { desc = "BracketLine" })
+
+	vim.keymap.set("v", "<leader>fg", function()
+		M.gsubCharForBLlineCommaDot()
+	end, { desc = "BracketLineCommaDot" })
+
 end
 
 return M
